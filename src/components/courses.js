@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 
 const courses = [
   {
-    title: 'أساسيات اللغة — من الصفر',
+    title: 'أساسيات اللغة، من الصفر',
     meta: '8h · 87 lectures',
     topics: [
       'نطق الحروف ومقاطع الحروف بشكل احترافي',
       'الأرقام من 1 إلى 1000 مع التمارين',
-      'Der Die Das — أدوات التعريف بأبسط الطرق',
+      'Der Die Das، أدوات التعريف بأبسط الطرق',
       'الجمل الأساسية، التحيات، التعارف',
       'قراءة الساعة، الألوان، أيام الأسبوع',
       'محادثات من الحياة اليومية + امتحانات',
@@ -18,7 +18,7 @@ const courses = [
     accent: 'border-t-4 border-t-[#FFCC00]'
   },
   {
-    title: 'التواصل الأساسي — تبدا تهضر',
+    title: 'التواصل الأساسي، تبدا تهضر',
     meta: '9.5h · 106 lectures',
     topics: [
       'الأفعال المنتظمة وغير المنتظمة',
@@ -32,13 +32,13 @@ const courses = [
     accent: 'border-t-4 border-t-orange-500'
   },
   {
-    title: 'الحياة اليومية — تتواصل بثقة',
+    title: 'الحياة اليومية، تتواصل بثقة',
     meta: '10.5h · 98 lectures',
     topics: [
       'الجمل الأساسية والفرعية (Nebensatz)',
       'تصاريف الصفات مع الحالات الإعرابية',
       'أهم 100 فعل مع تصاريف الأزمنة',
-      'Konjunktiv II — التعبير عن الرغبات',
+      'Konjunktiv II، التعبير عن الرغبات',
       'أساسيات بناء الجمل المركبة',
       'محادثات واقعية: طعام، سفر، صحة، عمل',
     ],
@@ -46,7 +46,7 @@ const courses = [
     accent: 'border-t-4 border-t-orange-700'
   },
   {
-    title: 'جاهز للامتحان — المستوى الأخير',
+    title: 'جاهز للامتحان، المستوى الأخير',
     meta: '5.5h · 55 lectures',
     topics: [
       'Genitiv + Passiv (المبني للمجهول)',
@@ -66,9 +66,8 @@ export default function Courses() {
     <section id="curriculum" className="py-24 bg-black/30" dir="rtl">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="text-[#FFCC00] text-sm font-black tracking-widest uppercase">CURRICULUM</span>
           <h2 className="text-4xl font-black text-white mt-4 mb-4">شنو غادي تقرا بالضبط؟</h2>
-          <p className="text-gray-400">4 كورسات كاملين، 346 درس، 33+ ساعة ديال المحتوى المنظم.</p>
+          <p className="text-gray-200">4 كورسات كاملين، 346 درس، 33+ ساعة ديال المحتوى المنظم.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">

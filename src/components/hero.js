@@ -54,7 +54,7 @@ export default function Hero() {
           </motion.h1>
 
           <motion.p variants={itemVariants} className="text-gray-400 text-lg md:text-xl leading-relaxed mb-10 max-w-xl ml-auto">
-            من صفر حتى A2 — كورسات كاملة بالفيديو، منظمين خطوة بخطوة. تمارين، حوارات، وامتحانات. كلشي اللي خاصك باش توصل للمستوى اللي كيطلبو للفيزا أو الدراسة.
+            من صفر حتى A2، كورسات كاملة بالفيديو، منظمين خطوة بخطوة. تمارين، حوارات، وامتحانات. كلشي اللي خاصك باش توصل للمستوى اللي كيطلبو للفيزا أو الدراسة.
           </motion.p>
 
           <motion.div variants={itemVariants} className="flex flex-wrap gap-4 mb-10">

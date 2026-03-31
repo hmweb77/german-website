@@ -14,7 +14,6 @@ export default function ValueProps() {
     <section className="py-24 border-t border-[#21262d]" dir="rtl">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="text-[#FFCC00] text-sm font-black tracking-widest uppercase">WHY THIS</span>
           <h2 className="text-4xl font-black text-white mt-4">علاش هاد الكورسات مختلفين؟</h2>
         </div>
 
@@ -25,10 +24,10 @@ export default function ValueProps() {
               whileHover={{ y: -5 }}
               className="p-8 bg-[#161b22] border border-[#30363d] rounded-2xl flex gap-6 items-start"
             >
-              <div className="text-4xl">{p.icon}</div>
+             
               <div className="text-right">
-                <h3 className="text-xl font-black text-white mb-3">{p.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{p.desc}</p>
+                <h3 className="text-xl font-black text-yellow-500 mb-3">{p.title}</h3>
+                <p className="text-gray-100 leading-relaxed">{p.desc}</p>
               </div>
             </motion.div>
           ))}

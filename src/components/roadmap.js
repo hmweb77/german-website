@@ -14,8 +14,7 @@ export default function Roadmap() {
     <section className="py-24 bg-[#0d1117]" dir="rtl">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="text-[#FFCC00] text-sm font-black tracking-widest uppercase">YOUR JOURNEY</span>
-          <h2 className="text-4xl font-black text-white mt-4 mb-4">من صفر حتى A2 — خطوة بخطوة</h2>
+          <h2 className="text-4xl font-black text-white mt-4 mb-4">من صفر حتى A2، خطوة بخطوة</h2>
           <p className="text-gray-400 max-w-2xl mx-auto">ماشي فيديوهات عشوائية. هادي خريطة طريق واضحة توصّلك للهدف ديالك.</p>
         </div>
 

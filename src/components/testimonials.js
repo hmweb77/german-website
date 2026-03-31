@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 
 const reviews = [
-  { name: 'سارة م.', role: 'طالبة — الدار البيضاء', text: 'كنت صفر فالألمانية، دابا كنفهم المحادثات البسيطة وكنقدر نعرف براسي. طريقة الشرح واضحة بزاف.' },
-  { name: 'يوسف ب.', role: 'Ausbildung متقدم — فاس', text: 'كنقلب على كورس منظم بالعربية وما لقيتش حتى واحد بحال هادا. التمارين والاستماع كيخليك تطبق فعلاً.' },
-  { name: 'نهيلة ع.', role: 'موظفة — الرباط', text: 'الثمن معقول بزاف مقارنة مع المراكز. وخا كنت خايفة من القواعد، ولكن الشرح سهل وكل حاجة مرتبة.' },
+  { name: 'سارة م.', role: 'طالبة، الدار البيضاء', text: 'كنت صفر فالألمانية، دابا كنفهم المحادثات البسيطة وكنقدر نعرف براسي. طريقة الشرح واضحة بزاف.', image: '/girl1.png' },
+  { name: 'يوسف ب.', role: 'Ausbildung متقدم، فاس', text: 'كنقلب على كورس منظم بالعربية وما لقيتش حتى واحد بحال هادا. التمارين والاستماع كيخليك تطبق فعلاً.', image: '/boy1.png' },
+  { name: 'نهيلة ع.', role: 'موظفة، الرباط', text: 'الثمن معقول بزاف مقارنة مع المراكز. وخا كنت خايفة من القواعد، ولكن الشرح سهل وكل حاجة مرتبة.', image: '/girl2.png' },
 ];
 
 export default function Testimonials() {
@@ -14,7 +14,6 @@ export default function Testimonials() {
     <section className="py-24 bg-black/40" dir="rtl">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="text-[#FFCC00] text-sm font-black tracking-widest uppercase">TESTIMONIALS</span>
           <h2 className="text-4xl font-black text-white mt-4">شنو كيقولو الطلبة</h2>
         </div>
 
@@ -32,11 +31,25 @@ export default function Testimonials() {
               </div>
               <p className="text-gray-300 italic mb-8 leading-relaxed">&ldquo;{r.text}&rdquo;</p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FFCC00] to-orange-600 flex items-center justify-center text-black font-black text-lg">
-                  {r.name.charAt(0)}
+                {/* Add img next to name */}
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FFCC00] to-orange-600 flex items-center justify-center text-black font-black text-lg overflow-hidden">
+                  {r.image ? (
+                    <img
+                      src={r.image}
+                      alt={r.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    r.name.charAt(0)
+                  )}
+                </div>
+                <div className="text-right flex items-center gap-2">
+                  {r.image && (
+                    <span className="hidden" aria-hidden="true"></span>
+                  )}
+                  <div className="text-white font-bold">{r.name}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-white font-bold">{r.name}</div>
                   <div className="text-xs text-gray-500">{r.role}</div>
                 </div>
               </div>

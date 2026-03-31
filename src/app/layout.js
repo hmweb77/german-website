@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Maroc Deutsch — تعلم الألمانية من الصفر حتى A2",
+  title: "Maroc Deutsch، تعلم الألمانية من الصفر حتى A2",
   description: "كورسات كاملة بالفيديو لتعلم الألمانية من الصفر حتى مستوى A2. منظمين خطوة بخطوة مع تمارين وامتحانات.",
 };
 
