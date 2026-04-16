@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { ArrowLeft, ShieldCheck, Award } from 'lucide-react';
 
 export default function RegistrationForm() {
+  const router = useRouter();
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
@@ -33,7 +35,8 @@ export default function RegistrationForm() {
         setErrorMessage(msg);
         return;
       }
-      setStatus('success');
+      router.push('/thank-you');
+      router.refresh();
     } catch {
       setStatus('idle');
       setErrorMessage('ما قدرناش نتواصلو مع الخادم. جربي من بعد.');
@@ -63,21 +66,7 @@ export default function RegistrationForm() {
               <Award size={40} className="opacity-20" />
             </div>
 
-            {status === 'success' ? (
-              <div className="p-8 space-y-4 text-center">
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 text-green-400 text-3xl">
-                  ✓
-                </div>
-               
-                <p className="text-lg text-gray-300 leading-relaxed">
-                  شكراً، غادي نتواصلو معاك قريباً.
-                </p>
-                <p className="text-sm text-gray-500">
-                  تم حفظ معلوماتك بنجاح، غادي نحددو معاك طريقة الدفع: كارط بنكية، فيريمو، أو CashPlus / Wafacash.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-300 block">الاسم الكامل</label>
                   <input
@@ -162,7 +151,6 @@ export default function RegistrationForm() {
                   تجربة تجريبية لمدة 7 أيام مع ضمان استرجاع المال إذا لم يناسبك الكورس
                 </div>
               </form>
-            )}
           </motion.div>
         </div>
       </div>
