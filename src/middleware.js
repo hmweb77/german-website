@@ -52,6 +52,13 @@ export async function middleware(request) {
     return NextResponse.redirect(url);
   }
 
+  // /reset-password must be reachable for anyone with a valid session
+  // (the Supabase recovery flow temporarily signs you in even before you've
+  // finished choosing a new password — don't block it on status or profile).
+  if (pathname === '/reset-password') {
+    return response;
+  }
+
   // No profile row at all → access denied.
   if (!profile) {
     if (pathname !== '/access-denied') {
@@ -100,5 +107,6 @@ export const config = {
     '/login',
     '/activate/:path*',
     '/access-denied',
+    '/reset-password',
   ],
 };
