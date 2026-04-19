@@ -16,7 +16,7 @@ export async function POST(request) {
   }
 
   const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://www.deutschmaroc.com/';
 
   const supabase = await createSupabaseServerClient();
   await supabase.auth.resetPasswordForEmail(emailParsed.data, {
