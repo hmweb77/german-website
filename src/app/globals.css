@@ -3,6 +3,15 @@
 @theme inline {
   --color-background: #0d1117;
   --color-foreground: #e6edf3;
+  --color-surface: #161b22;
+  --color-border: #30363d;
+  --color-border-soft: #21262d;
+  --color-brand: #FFCC00;
+  --color-brand-dark: #E6B800;
+  --color-level-a1-1: #22c55e;
+  --color-level-a1-2: #14b8a6;
+  --color-level-a2-1: #3b82f6;
+  --color-level-a2-2: #a855f7;
   --font-sans: 'Cairo', sans-serif;
   --font-mono: 'DM Sans', sans-serif;
 }
@@ -16,6 +25,11 @@ body {
   color: #e6edf3;
   font-family: 'Cairo', sans-serif;
   overflow-x: hidden;
+}
+
+/* French LTR app layout — DM Sans primary, Cairo fallback for Arabic strings */
+body.app-ltr {
+  font-family: 'DM Sans', 'Cairo', sans-serif;
 }
 
 .font-mono {
