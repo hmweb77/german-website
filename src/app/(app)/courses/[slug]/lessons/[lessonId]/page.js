@@ -27,6 +27,7 @@ export default async function LessonPage({ params }) {
   const { slug, lessonId } = await params;
   const { user, profile } = await getSessionAndProfile();
   if (!user) redirect('/login');
+  if (!profile || profile.status === 'pending') redirect('/activate');
   if (!isActiveUser(profile)) redirect('/access-denied');
   if (!profile.display_name) redirect('/activate');
 

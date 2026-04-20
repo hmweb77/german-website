@@ -14,6 +14,9 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage() {
   const { user, profile } = await getSessionAndProfile();
   if (!user) redirect('/login');
+  // Pending / missing profile → /activate (so they can finish). Revoked /
+  // unknown → /access-denied. Matches middleware.
+  if (!profile || profile.status === 'pending') redirect('/activate');
   if (!isActiveUser(profile)) redirect('/access-denied');
   if (!profile.display_name) redirect('/activate');
 

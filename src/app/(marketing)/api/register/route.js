@@ -25,16 +25,21 @@ async function issueTrialInvite({ email, name }) {
 
     const userId = link?.user?.id;
     if (userId) {
-      await admin.from('allowed_users').upsert(
-        {
-          id: userId,
-          email,
-          display_name: name || null,
-          status: 'pending',
-          access_level: 'trial',
-        },
-        { onConflict: 'id' }
-      );
+      const baseRow = {
+        id: userId,
+        email,
+        display_name: name || null,
+        status: 'pending',
+      };
+      const { error: upsertErr } = await admin
+        .from('allowed_users')
+        .upsert({ ...baseRow, access_level: 'trial' }, { onConflict: 'id' });
+      // Retry without access_level if migration 0002 hasn't been applied.
+      if (upsertErr) {
+        await admin
+          .from('allowed_users')
+          .upsert(baseRow, { onConflict: 'id' });
+      }
     }
 
     await sendInviteEmail({

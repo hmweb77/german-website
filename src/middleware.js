@@ -55,14 +55,17 @@ export async function middleware(request) {
     };
   }
 
-  // Signed-in user landing on /login — bounce to dashboard (or activate).
+  // Signed-in user landing on /login — only fast-track to /dashboard when
+  // the profile is fully active and set up. If the profile is missing,
+  // pending, revoked, etc., let /login render so the user can sign out and
+  // try a different account instead of being bounced to /access-denied.
   if (pathname === '/login') {
-    const url = request.nextUrl.clone();
-    url.pathname =
-      profile && profile.status === 'active' && profile.display_name
-        ? '/dashboard'
-        : '/activate';
-    return NextResponse.redirect(url);
+    if (profile && profile.status === 'active' && profile.display_name) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/dashboard';
+      return NextResponse.redirect(url);
+    }
+    return response;
   }
 
   // /reset-password must be reachable for anyone with a valid session
@@ -72,20 +75,27 @@ export async function middleware(request) {
     return response;
   }
 
-  // No profile row at all → access denied.
+  // No profile row at all → send to /activate so set-display-name can
+  // create one. /access-denied is only for confirmed revoked/blocked users.
   if (!profile) {
-    if (pathname !== '/access-denied') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/access-denied';
-      return NextResponse.redirect(url);
+    if (pathname.startsWith('/activate') || pathname === '/access-denied') {
+      return response;
     }
-    return response;
+    const url = request.nextUrl.clone();
+    url.pathname = '/activate';
+    return NextResponse.redirect(url);
   }
 
-  // Revoked / pending → access denied, EXCEPT pending users completing /activate.
+  // Pending users → let them finish activation at /activate, don't dead-end
+  // them on /access-denied. Revoked / other non-active → /access-denied.
   if (profile.status !== 'active') {
-    const allowActivate = profile.status === 'pending' && pathname.startsWith('/activate');
-    if (!allowActivate && pathname !== '/access-denied') {
+    if (profile.status === 'pending') {
+      if (pathname.startsWith('/activate')) return response;
+      const url = request.nextUrl.clone();
+      url.pathname = '/activate';
+      return NextResponse.redirect(url);
+    }
+    if (pathname !== '/access-denied') {
       const url = request.nextUrl.clone();
       url.pathname = '/access-denied';
       return NextResponse.redirect(url);

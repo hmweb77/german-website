@@ -18,11 +18,13 @@ async function inviteOne({ admin, email, invitedBy }) {
     return { email, skipped: true, reason: 'already-active' };
   }
 
-  // Generate invite link via Supabase admin API.
+  // Route through /auth/callback so the code is exchanged server-side and the
+  // session cookie is set before the user ever reaches /activate (matches the
+  // marketing register flow at src/app/(marketing)/api/register/route.js).
   const { data, error } = await admin.auth.admin.generateLink({
     type: 'invite',
     email,
-    options: { redirectTo: `${appUrl}/activate` },
+    options: { redirectTo: `${appUrl}/auth/callback?next=/activate` },
   });
   if (error || !data?.properties?.action_link) {
     return { email, error: error?.message || 'generateLink failed' };
@@ -30,18 +32,38 @@ async function inviteOne({ admin, email, invitedBy }) {
 
   const userId = data.user?.id;
   if (userId) {
-    await admin
+    // If an old allowed_users row exists for this email under a stale id
+    // (deleted/re-created auth user), delete it first — otherwise the upsert
+    // below fails the `email UNIQUE` constraint silently.
+    if (existing && existing.id !== userId) {
+      const { error: delErr } = await admin
+        .from('allowed_users')
+        .delete()
+        .eq('email', email);
+      if (delErr) {
+        console.error('[invite orphan delete]', delErr);
+      }
+    }
+
+    const baseRow = {
+      id: userId,
+      email,
+      status: 'pending',
+      invited_at: new Date().toISOString(),
+      invited_by: invitedBy,
+    };
+    const { error: upsertErr } = await admin
       .from('allowed_users')
-      .upsert(
-        {
-          id: userId,
-          email,
-          status: existing?.status === 'active' ? 'active' : 'pending',
-          invited_at: new Date().toISOString(),
-          invited_by: invitedBy,
-        },
-        { onConflict: 'id' }
-      );
+      .upsert({ ...baseRow, access_level: 'trial' }, { onConflict: 'id' });
+    // Retry without access_level if migration 0002 hasn't been applied yet.
+    if (upsertErr) {
+      const retry = await admin
+        .from('allowed_users')
+        .upsert(baseRow, { onConflict: 'id' });
+      if (retry.error) {
+        console.error('[invite upsert]', retry.error);
+      }
+    }
   }
 
   try {

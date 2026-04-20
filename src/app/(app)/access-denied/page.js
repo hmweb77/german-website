@@ -26,7 +26,13 @@ export default function AccessDeniedPage() {
           </a>
           .
         </p>
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="/api/auth/signout?next=/login"
+            className="inline-flex items-center justify-center rounded-xl px-6 py-3 font-semibold bg-[#FFCC00] text-black hover:scale-[1.02] transition-all"
+          >
+            Se déconnecter et réessayer
+          </a>
           <Link
             href="/"
             className="inline-flex items-center justify-center rounded-xl px-6 py-3 font-semibold border border-[#30363d] bg-[#0d1117] hover:border-[#FFCC00] transition-all"
