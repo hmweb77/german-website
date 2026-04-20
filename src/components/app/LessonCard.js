@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { CheckCircle2, PlayCircle } from 'lucide-react';
+import { CheckCircle2, PlayCircle, Lock } from 'lucide-react';
 import { formatDuration } from '@/lib/format';
 
-export default function LessonCard({ lesson, courseSlug, progress }) {
+export default function LessonCard({ lesson, courseSlug, progress, locked = false }) {
   const completed = progress?.completed === true;
   const inProgress = !completed && (progress?.watched_seconds || 0) > 0;
 
@@ -10,7 +10,9 @@ export default function LessonCard({ lesson, courseSlug, progress }) {
     <Link
       href={`/courses/${courseSlug}/lessons/${lesson.id}`}
       className={`flex gap-4 p-4 rounded-2xl border transition group ${
-        inProgress
+        locked
+          ? 'border-[#21262d] bg-[#0d1117]/60 opacity-70 hover:opacity-100 hover:border-[#FFCC00]/30'
+          : inProgress
           ? 'border-[#FFCC00]/60 bg-[#1b222c]'
           : 'border-[#30363d] bg-[#161b22] hover:border-[#FFCC00]/40 hover:bg-[#1b222c]'
       }`}
@@ -21,14 +23,19 @@ export default function LessonCard({ lesson, courseSlug, progress }) {
           <img
             src={lesson.thumbnail_url}
             alt=""
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${locked ? 'grayscale' : ''}`}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-500">
             <PlayCircle className="w-8 h-8" />
           </div>
         )}
-        {completed ? (
+        {locked ? (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <Lock className="w-5 h-5 text-[#FFCC00]" />
+          </div>
+        ) : null}
+        {!locked && completed ? (
           <div className="absolute top-1.5 right-1.5 bg-green-500 text-black rounded-full p-0.5">
             <CheckCircle2 className="w-4 h-4" />
           </div>
@@ -43,8 +50,9 @@ export default function LessonCard({ lesson, courseSlug, progress }) {
         </p>
         <div className="mt-2 flex items-center gap-3 text-xs text-gray-500 font-mono">
           <span>{formatDuration(lesson.duration_seconds)}</span>
-          {inProgress ? <span className="text-[#FFCC00]">En cours</span> : null}
-          {completed ? <span className="text-green-400">Terminé</span> : null}
+          {locked ? <span className="text-[#FFCC00]">Verrouillé</span> : null}
+          {!locked && inProgress ? <span className="text-[#FFCC00]">En cours</span> : null}
+          {!locked && completed ? <span className="text-green-400">Terminé</span> : null}
         </div>
       </div>
     </Link>

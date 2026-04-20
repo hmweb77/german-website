@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { emailSchema } from '@/lib/validation/schemas';
+import { getAppUrl } from '@/lib/appUrl';
 
 export async function POST(request) {
   let body;
@@ -15,12 +16,9 @@ export async function POST(request) {
     return NextResponse.json({ error: 'E-mail invalide' }, { status: 400 });
   }
 
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://www.deutschmaroc.com/';
-
   const supabase = await createSupabaseServerClient();
   await supabase.auth.resetPasswordForEmail(emailParsed.data, {
-    redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
+    redirectTo: `${getAppUrl()}/auth/callback?next=/reset-password`,
   });
 
   // Always respond OK to avoid leaking whether an account exists.

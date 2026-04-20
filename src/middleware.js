@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { updateSession } from '@/lib/supabase/middleware';
+import { ensureAdminProfile } from '@/lib/supabase/bootstrapAdmin';
 
 const PROTECTED_PREFIXES = ['/dashboard', '/courses', '/admin'];
 const AUTH_ONLY_PATHS = ['/login', '/activate', '/access-denied'];
@@ -36,11 +37,23 @@ export async function middleware(request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
-  const { data: profile } = await admin
+  let { data: profile } = await admin
     .from('allowed_users')
     .select('status, is_admin, display_name')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
+
+  // Auto-create/repair the admin's allowed_users row based on ADMIN_EMAIL env.
+  // Lets the designated admin(s) always reach the dashboard even if their
+  // allowed_users row was never seeded.
+  const bootstrapped = await ensureAdminProfile({ user, admin });
+  if (bootstrapped) {
+    profile = {
+      status: bootstrapped.status,
+      is_admin: bootstrapped.is_admin,
+      display_name: bootstrapped.display_name,
+    };
+  }
 
   // Signed-in user landing on /login — bounce to dashboard (or activate).
   if (pathname === '/login') {

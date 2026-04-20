@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserPlus, Users, Ban, Send } from 'lucide-react';
+import { UserPlus, Users, Ban, Send, Unlock, Lock, Trash2 } from 'lucide-react';
 
 function StatusPill({ status }) {
   const cls =
@@ -78,6 +78,47 @@ export default function UsersManager({ users }) {
       setErr(j.error || 'Échec');
       return;
     }
+    startTransition(() => router.refresh());
+  }
+
+  async function toggleAccess(id, current) {
+    setMsg('');
+    setErr('');
+    const next = current === 'full' ? 'trial' : 'full';
+    const res = await fetch('/api/admin/users/access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, accessLevel: next }),
+    });
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      setErr(j.error || 'Échec');
+      return;
+    }
+    setMsg(next === 'full' ? 'Accès complet activé.' : 'Accès remis en essai.');
+    startTransition(() => router.refresh());
+  }
+
+  async function destroy(id, email) {
+    if (
+      !confirm(
+        `Supprimer définitivement ${email} ? Cette action est irréversible et supprime toutes ses données (progression, notes, certificats).`
+      )
+    )
+      return;
+    setMsg('');
+    setErr('');
+    const res = await fetch('/api/admin/users/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      setErr(j.error || 'Échec');
+      return;
+    }
+    setMsg(`${email} supprimé.`);
     startTransition(() => router.refresh());
   }
 
@@ -161,6 +202,7 @@ export default function UsersManager({ users }) {
                 <th className="px-4 py-3 text-left">E-mail</th>
                 <th className="px-4 py-3 text-left">Nom</th>
                 <th className="px-4 py-3 text-left">Statut</th>
+                <th className="px-4 py-3 text-left">Accès</th>
                 <th className="px-4 py-3 text-left">Invité le</th>
                 <th className="px-4 py-3 text-left">Activé le</th>
                 <th className="px-4 py-3 text-right">Actions</th>
@@ -169,7 +211,7 @@ export default function UsersManager({ users }) {
             <tbody className="divide-y divide-[#21262d]">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                     Aucun utilisateur.
                   </td>
                 </tr>
@@ -192,6 +234,21 @@ export default function UsersManager({ users }) {
                     <td className="px-4 py-3">
                       <StatusPill status={u.status} />
                     </td>
+                    <td className="px-4 py-3">
+                      {u.is_admin ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FFCC00]/15 text-[#FFCC00] border border-[#FFCC00]/40 font-mono">
+                          ILLIMITÉ
+                        </span>
+                      ) : u.access_level === 'full' ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/15 text-green-300 border border-green-500/40 font-mono">
+                          COMPLET
+                        </span>
+                      ) : (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-500/15 text-gray-300 border border-gray-500/40 font-mono">
+                          ESSAI
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-gray-500 font-mono text-xs">
                       {u.invited_at
                         ? new Date(u.invited_at).toLocaleDateString('fr-FR')
@@ -213,6 +270,29 @@ export default function UsersManager({ users }) {
                             Renvoyer
                           </button>
                         ) : null}
+                        {!u.is_admin ? (
+                          <button
+                            onClick={() => toggleAccess(u.id, u.access_level)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#FFCC00]/40 text-[#FFCC00] hover:bg-[#FFCC00]/10 text-xs transition"
+                            title={
+                              u.access_level === 'full'
+                                ? 'Repasser en essai (1 leçon)'
+                                : 'Débloquer tous les cours'
+                            }
+                          >
+                            {u.access_level === 'full' ? (
+                              <>
+                                <Lock className="w-3.5 h-3.5" />
+                                Verrouiller
+                              </>
+                            ) : (
+                              <>
+                                <Unlock className="w-3.5 h-3.5" />
+                                Débloquer
+                              </>
+                            )}
+                          </button>
+                        ) : null}
                         {u.status !== 'revoked' && !u.is_admin ? (
                           <button
                             onClick={() => revoke(u.id)}
@@ -220,6 +300,16 @@ export default function UsersManager({ users }) {
                           >
                             <Ban className="w-3.5 h-3.5" />
                             Révoquer
+                          </button>
+                        ) : null}
+                        {!u.is_admin ? (
+                          <button
+                            onClick={() => destroy(u.id, u.email)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-500/60 text-red-300 hover:bg-red-500/20 text-xs transition"
+                            title="Supprimer définitivement"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Supprimer
                           </button>
                         ) : null}
                       </div>

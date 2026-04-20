@@ -259,24 +259,24 @@ export default function LoginForm() {
     <form onSubmit={verifyOtp} className="space-y-4">
       {info ? <p className="text-sm text-gray-400">{info}</p> : null}
       <label className="block text-sm font-medium text-gray-300">
-        Code à 6 chiffres
+        Code de vérification
         <input
           type="text"
           inputMode="numeric"
-          pattern="\d{6}"
-          maxLength={6}
+          pattern="\d{6,10}"
+          maxLength={10}
           required
           autoFocus
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 10))}
           placeholder="123456"
-          className="mt-1 w-full px-4 py-3 rounded-xl bg-[#0d1117] border border-[#30363d] focus:border-[#FFCC00] focus:outline-none transition tracking-[0.35em] text-center text-lg font-mono"
+          className="mt-1 w-full px-4 py-3 rounded-xl bg-[#0d1117] border border-[#30363d] focus:border-[#FFCC00] focus:outline-none transition tracking-[0.3em] text-center text-lg font-mono"
         />
       </label>
       {error ? <p className="text-red-400 text-sm">{error}</p> : null}
       <button
         type="submit"
-        disabled={loading || code.length !== 6}
+        disabled={loading || code.length < 6}
         className="w-full py-3 rounded-xl bg-[#FFCC00] text-black font-bold disabled:opacity-60 hover:scale-[1.01] transition"
       >
         {loading ? 'Vérification…' : 'Se connecter'}

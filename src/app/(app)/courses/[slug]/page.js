@@ -7,6 +7,11 @@ import LessonCard from '@/components/app/LessonCard';
 import ProgressBar from '@/components/app/ProgressBar';
 import { getSessionAndProfile, isActiveUser } from '@/lib/supabase/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import {
+  getTrialUnlockedLesson,
+  canAccessLesson,
+  isTrialProfile,
+} from '@/lib/access';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +61,9 @@ export default async function CoursePage({ params }) {
   const completion =
     visibleLessons.length > 0 ? (completed / visibleLessons.length) * 100 : 0;
 
+  const trialUnlock = profile.is_admin ? null : await getTrialUnlockedLesson();
+  const isTrial = isTrialProfile(profile) && !profile.is_admin;
+
   return (
     <AppShell activeSection="dashboard">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 space-y-6">
@@ -101,12 +109,30 @@ export default async function CoursePage({ params }) {
             </div>
           ) : (
             <ul className="space-y-3">
+              {isTrial ? (
+                <li className="rounded-xl border border-[#FFCC00]/30 bg-[#FFCC00]/5 px-4 py-3 text-sm text-[#FFCC00]/90 flex items-center justify-between gap-3">
+                  <span>
+                    Essai gratuit : une seule leçon est accessible. Les autres sont
+                    verrouillées.
+                  </span>
+                  <a
+                    href="mailto:support@deutschmaroc.com?subject=Débloquer%20tous%20les%20cours"
+                    className="underline font-semibold whitespace-nowrap"
+                  >
+                    Débloquer
+                  </a>
+                </li>
+              ) : null}
               {visibleLessons.map((l) => (
                 <li key={l.id}>
                   <LessonCard
                     lesson={l}
                     courseSlug={course.slug}
                     progress={progressByLesson.get(l.id)}
+                    locked={
+                      !profile.is_admin &&
+                      !canAccessLesson(profile, l.id, trialUnlock)
+                    }
                   />
                 </li>
               ))}

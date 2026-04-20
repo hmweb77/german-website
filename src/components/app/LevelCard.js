@@ -3,8 +3,8 @@ import { Lock } from 'lucide-react';
 import LevelBadge from './LevelBadge';
 import ProgressBar from './ProgressBar';
 
-export default function LevelCard({ level, course, lessonCount = 0, completion = 0 }) {
-  const locked = !course || !course.is_published;
+export default function LevelCard({ level, course, lessonCount = 0, completion = 0, trialLocked = false }) {
+  const locked = !course || !course.is_published || trialLocked;
 
   const Wrapper = locked ? 'div' : Link;
   const wrapperProps = locked ? {} : { href: `/courses/${course.slug}` };

@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 export const emailSchema = z.string().trim().toLowerCase().email();
 
-export const otpSchema = z.string().trim().regex(/^\d{6}$/, 'Code à 6 chiffres');
+export const otpSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{6,10}$/, 'Code numérique de 6 à 10 chiffres');
 
 export const displayNameSchema = z
   .string()

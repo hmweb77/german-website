@@ -1,4 +1,50 @@
 import { NextResponse } from 'next/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { sendInviteEmail } from '@/lib/email/send';
+import { getAppUrl } from '@/lib/appUrl';
+
+/**
+ * Fire-and-forget: creates/updates a pending trial user and emails an
+ * activation link. Never throws — any error is logged but does not affect
+ * the lead-capture response (Google Sheets save is the source of truth).
+ */
+async function issueTrialInvite({ email, name }) {
+  try {
+    const admin = createSupabaseAdminClient();
+    const redirectTo = `${getAppUrl()}/auth/callback?next=/activate`;
+
+    const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
+      type: 'invite',
+      email,
+      options: { redirectTo, data: { display_name: name } },
+    });
+    if (linkErr) {
+      console.error('trial invite generateLink failed:', linkErr);
+      return;
+    }
+
+    const userId = link?.user?.id;
+    if (userId) {
+      await admin.from('allowed_users').upsert(
+        {
+          id: userId,
+          email,
+          display_name: name || null,
+          status: 'pending',
+          access_level: 'trial',
+        },
+        { onConflict: 'id' }
+      );
+    }
+
+    await sendInviteEmail({
+      to: email,
+      activateUrl: link?.properties?.action_link || redirectTo,
+    });
+  } catch (err) {
+    console.error('issueTrialInvite failed:', err);
+  }
+}
 
 const PAYMENT_LABELS = {
   card: 'Carte Bancaire',
@@ -112,6 +158,7 @@ export async function POST(request) {
     let json = parseWebhookResponse(text);
 
     if (json && json.ok === true) {
+      await issueTrialInvite({ email, name });
       return NextResponse.json({ ok: true, saved: true });
     }
 
@@ -144,6 +191,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'تعذر حفظ التسجيل فالجدول' }, { status: 502 });
     }
 
+    await issueTrialInvite({ email, name });
     return NextResponse.json({ ok: true, saved: true });
   } catch (err) {
     console.error('Sheets webhook fetch failed:', err);

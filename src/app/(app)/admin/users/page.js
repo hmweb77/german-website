@@ -13,7 +13,7 @@ export default async function AdminUsersPage({ searchParams }) {
   const admin = createSupabaseAdminClient();
   let query = admin
     .from('allowed_users')
-    .select('id, email, status, is_admin, display_name, invited_at, activated_at')
+    .select('id, email, status, is_admin, display_name, invited_at, activated_at, access_level')
     .order('invited_at', { ascending: false })
     .limit(200);
 

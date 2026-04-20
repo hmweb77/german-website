@@ -9,6 +9,12 @@ import { getSessionAndProfile, isActiveUser } from '@/lib/supabase/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { signPlaybackToken } from '@/lib/cloudflare/signedUrl';
 import { formatDuration } from '@/lib/format';
+import {
+  getTrialUnlockedLesson,
+  canAccessLesson,
+  isTrialProfile,
+} from '@/lib/access';
+import { Lock } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,8 +76,15 @@ export default async function LessonPage({ params }) {
     (progressRows || []).filter((p) => p.completed).map((p) => p.lesson_id)
   );
 
+  // Access gate: admins always get through; trial users only get the
+  // trial-unlocked lesson.
+  const trialUnlock = profile.is_admin ? null : await getTrialUnlockedLesson();
+  const locked =
+    !profile.is_admin && !canAccessLesson(profile, lesson.id, trialUnlock);
+  const isTrial = isTrialProfile(profile);
+
   let signedToken = null;
-  if (lesson.cloudflare_video_id) {
+  if (!locked && lesson.cloudflare_video_id) {
     try {
       signedToken = await signPlaybackToken({
         videoUid: lesson.cloudflare_video_id,
@@ -95,7 +108,24 @@ export default async function LessonPage({ params }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
           <div className="space-y-5">
-            {signedToken ? (
+            {locked ? (
+              <div className="aspect-video w-full rounded-2xl border border-[#FFCC00]/30 bg-[#161b22] flex flex-col items-center justify-center gap-3 px-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-[#FFCC00]/10 text-[#FFCC00] flex items-center justify-center">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div className="text-[#FFCC00] font-semibold">Leçon verrouillée</div>
+                <p className="text-sm text-gray-400 max-w-md">
+                  Cette leçon fait partie du contenu complet. Votre essai gratuit
+                  donne accès uniquement à la première leçon du premier cours.
+                </p>
+                <a
+                  href="mailto:support@deutschmaroc.com?subject=Débloquer%20tous%20les%20cours"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FFCC00] text-black font-semibold text-sm hover:scale-[1.02] transition"
+                >
+                  Débloquer tous les cours
+                </a>
+              </div>
+            ) : signedToken ? (
               <VideoPlayer
                 lessonId={lesson.id}
                 signedToken={signedToken}
@@ -108,6 +138,19 @@ export default async function LessonPage({ params }) {
                 Vidéo en cours de traitement…
               </div>
             )}
+
+            {isTrial && !locked ? (
+              <div className="rounded-xl border border-[#FFCC00]/30 bg-[#FFCC00]/5 px-4 py-3 text-sm text-[#FFCC00]/90">
+                Vous regardez la leçon offerte en essai gratuit.{' '}
+                <a
+                  href="mailto:support@deutschmaroc.com?subject=Débloquer%20tous%20les%20cours"
+                  className="underline font-semibold"
+                >
+                  Débloquer tout le programme
+                </a>
+                .
+              </div>
+            ) : null}
 
             <div className="flex items-center gap-2 flex-wrap">
               <LevelBadge level={course.level} />

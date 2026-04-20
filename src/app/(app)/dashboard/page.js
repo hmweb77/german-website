@@ -6,6 +6,7 @@ import ContinueWatchingCard from '@/components/app/ContinueWatchingCard';
 import { getSessionAndProfile, isActiveUser } from '@/lib/supabase/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { LEVELS } from '@/lib/format';
+import { getTrialUnlockedLesson, isTrialProfile } from '@/lib/access';
 
 export const metadata = { title: 'Tableau de bord — DeutschMaroc' };
 export const dynamic = 'force-dynamic';
@@ -52,6 +53,9 @@ export default async function DashboardPage() {
     coursesByLevel.get(c.level).push(c);
   }
 
+  const trialUnlock = profile.is_admin ? null : await getTrialUnlockedLesson();
+  const isTrial = isTrialProfile(profile) && !profile.is_admin;
+
   const levelSummaries = LEVELS.map((level) => {
     const levelCourses = (coursesByLevel.get(level) || []).filter((c) => c.is_published);
     const courseForCard = levelCourses[0] || null;
@@ -65,7 +69,9 @@ export default async function DashboardPage() {
       }
     }
     const completion = total > 0 ? (done / total) * 100 : 0;
-    return { level, course: courseForCard, lessonCount: total, completion };
+    const trialLocked =
+      isTrial && (!courseForCard || !trialUnlock || courseForCard.id !== trialUnlock.courseId);
+    return { level, course: courseForCard, lessonCount: total, completion, trialLocked };
   });
 
   // Continue watching — most recent incomplete lesson.
@@ -93,6 +99,24 @@ export default async function DashboardPage() {
             Votre parcours
           </h1>
         </header>
+
+        {isTrial ? (
+          <div className="rounded-2xl border border-[#FFCC00]/30 bg-[#FFCC00]/5 px-5 py-4 text-sm text-[#FFCC00]/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <div className="font-semibold text-[#FFCC00]">Essai gratuit actif</div>
+              <div className="text-xs text-[#FFCC00]/80 mt-0.5">
+                Vous avez accès à la première leçon du premier cours. Débloquez tout le
+                programme pour accéder à l'ensemble des niveaux.
+              </div>
+            </div>
+            <a
+              href="mailto:support@deutschmaroc.com?subject=Débloquer%20tous%20les%20cours"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FFCC00] text-black font-semibold text-sm hover:scale-[1.02] transition whitespace-nowrap"
+            >
+              Débloquer tout
+            </a>
+          </div>
+        ) : null}
 
         {continueItem ? <ContinueWatchingCard item={continueItem} /> : null}
 
