@@ -31,7 +31,10 @@ export async function POST(request) {
       title: parsed.data.title,
       description: parsed.data.description || null,
       order_index: orderIndex,
-      is_published: parsed.data.is_published ?? false,
+      // Default new lessons to published — admins can still explicitly send
+      // is_published:false to create drafts. Students shouldn't have to wait
+      // on a separate "publish" step for every lesson added.
+      is_published: parsed.data.is_published ?? true,
     })
     .select()
     .single();

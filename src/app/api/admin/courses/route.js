@@ -20,7 +20,9 @@ export async function POST(request) {
       description: parsed.data.description || null,
       level: parsed.data.level,
       order_index: parsed.data.order_index ?? 0,
-      is_published: parsed.data.is_published ?? false,
+      // Default new courses to published for the same reason as new lessons —
+      // admins can send is_published:false explicitly to create drafts.
+      is_published: parsed.data.is_published ?? true,
     })
     .select()
     .single();

@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import AdminShell from '@/components/app/AdminShell';
-import LevelBadge from '@/components/app/LevelBadge';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import LessonsManager from './LessonsManager';
+import CourseEditor from './CourseEditor';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,16 +41,7 @@ export default async function AdminCourseLessonsPage({ params }) {
           Tous les cours
         </Link>
 
-        <header className="rounded-2xl border border-[#30363d] bg-[#161b22] p-5">
-          <div className="flex items-center gap-3 flex-wrap">
-            <LevelBadge level={course.level} />
-            <span className="text-xs text-gray-500 font-mono">/{course.slug}</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-bold">{course.title}</h1>
-          {course.description ? (
-            <p className="text-gray-400 mt-1">{course.description}</p>
-          ) : null}
-        </header>
+        <CourseEditor course={course} lessons={lessons || []} />
 
         <LessonsManager courseId={course.id} initialLessons={lessons || []} />
       </div>

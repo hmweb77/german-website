@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 import AppShell from '@/components/app/AppShell';
 import LevelCard from '@/components/app/LevelCard';
 import ContinueWatchingCard from '@/components/app/ContinueWatchingCard';
+import VideoPrefetch from '@/components/app/VideoPrefetch';
 import { getSessionAndProfile, isActiveUser } from '@/lib/supabase/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { LEVELS } from '@/lib/format';
@@ -28,7 +29,7 @@ export default async function DashboardPage() {
         .from('courses')
         .select('id, slug, title, description, level, is_published')
         .order('order_index', { ascending: true }),
-      admin.from('lessons').select('id, course_id, duration_seconds, is_published, order_index, title, thumbnail_url'),
+      admin.from('lessons').select('id, course_id, duration_seconds, is_published, order_index, title, thumbnail_url, cloudflare_video_id'),
       admin
         .from('watch_progress')
         .select('lesson_id, watched_seconds, completed, last_watched_at')
@@ -91,8 +92,28 @@ export default async function DashboardPage() {
     break;
   }
 
+  // Warm up the single most-likely-next video so the iframe fetch is
+  // already cached by the time the student clicks. Prefer the in-progress
+  // lesson; fall back to the trial-unlocked first lesson for trial users.
+  const prefetchLessons = [];
+  if (continueItem?.lesson?.cloudflare_video_id) {
+    prefetchLessons.push({
+      id: continueItem.lesson.id,
+      cloudflare_video_id: continueItem.lesson.cloudflare_video_id,
+    });
+  } else if (isTrial && trialUnlock) {
+    const trialLesson = (lessons || []).find((l) => l.id === trialUnlock.lessonId);
+    if (trialLesson?.cloudflare_video_id) {
+      prefetchLessons.push({
+        id: trialLesson.id,
+        cloudflare_video_id: trialLesson.cloudflare_video_id,
+      });
+    }
+  }
+
   return (
     <AppShell activeSection="dashboard">
+      <VideoPrefetch lessons={prefetchLessons} />
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
         <header>
           <p className="text-sm text-gray-400">

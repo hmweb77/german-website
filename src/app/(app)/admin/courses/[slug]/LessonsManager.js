@@ -16,7 +16,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Plus, Trash2, UploadCloud, PlayCircle } from 'lucide-react';
+import { GripVertical, Plus, Trash2, UploadCloud, PlayCircle, Link as LinkIcon } from 'lucide-react';
 import { formatDuration } from '@/lib/format';
 
 function SortableRow({ lesson, onEdit, onDelete, onTogglePublish, onUpload }) {
@@ -319,11 +319,17 @@ function LessonPanel({ courseId, lesson, mode, onClose, onSaved }) {
 }
 
 function UploadPanel({ lesson, onClose, onUploaded }) {
+  const [tab, setTab] = useState('upload'); // 'upload' | 'link'
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | requesting | uploading | processing | done | error
   const [progress, setProgress] = useState(0);
   const [err, setErr] = useState('');
   const [updated, setUpdated] = useState(lesson);
+
+  // UID-linking state
+  const [uidInput, setUidInput] = useState('');
+  const [linkStatus, setLinkStatus] = useState('idle'); // idle | linking | done | error
+  const [linkMsg, setLinkMsg] = useState('');
 
   async function upload() {
     if (!file) return;
@@ -372,61 +378,152 @@ function UploadPanel({ lesson, onClose, onUploaded }) {
     }
   }
 
+  async function linkUid() {
+    if (!uidInput.trim()) return;
+    setLinkMsg('');
+    setLinkStatus('linking');
+    try {
+      const res = await fetch(`/api/admin/lessons/${lesson.id}/link-video`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cloudflare_video_id: uidInput }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Impossible de lier la vidéo');
+      setUpdated(json.lesson);
+      setLinkStatus('done');
+      setLinkMsg(
+        json.readyToStream
+          ? 'Vidéo liée et prête à diffuser.'
+          : `Vidéo liée (statut Cloudflare: ${json.state || 'en cours'}). La miniature et la durée seront complétées dès que la vidéo sera prête.`
+      );
+      onUploaded(json.lesson);
+    } catch (e) {
+      setLinkMsg(e.message);
+      setLinkStatus('error');
+    }
+  }
+
+  const tabBtn = (key, label) => (
+    <button
+      type="button"
+      onClick={() => setTab(key)}
+      className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition ${
+        tab === key
+          ? 'bg-[#FFCC00] text-black'
+          : 'border border-[#30363d] text-gray-300 hover:border-[#FFCC00]/60'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-md rounded-2xl bg-[#161b22] border border-[#30363d] p-6 space-y-4"
       >
-        <h2 className="text-lg font-bold">Uploader la vidéo</h2>
-        <p className="text-sm text-gray-400">
-          La vidéo est envoyée directement à Cloudflare Stream (elle ne passe pas par notre serveur).
-        </p>
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#FFCC00] file:text-black file:font-semibold"
-        />
-        {status === 'uploading' ? (
-          <div>
-            <div className="w-full h-2 bg-[#21262d] rounded-full overflow-hidden">
-              <div className="h-full bg-[#FFCC00] transition-all" style={{ width: `${progress}%` }} />
-            </div>
-            <div className="text-xs text-gray-500 mt-1 font-mono">
-              Envoi à Cloudflare: {Math.round(progress)}%
-            </div>
-          </div>
-        ) : null}
-        {status === 'processing' ? (
-          <div className="text-sm text-gray-400">
-            Cloudflare traite la vidéo… (durée et miniature bientôt disponibles)
-          </div>
-        ) : null}
-        {status === 'done' ? (
-          <div className="text-sm text-green-400">
-            Vidéo envoyée !{' '}
-            {updated?.duration_seconds
-              ? `Durée: ${Math.round(updated.duration_seconds)}s`
-              : 'Métadonnées en cours via webhook.'}
-          </div>
-        ) : null}
-        {err ? <div className="text-sm text-red-400">{err}</div> : null}
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-[#30363d] hover:border-[#FFCC00]/60 text-sm transition"
-          >
-            Fermer
-          </button>
-          <button
-            onClick={upload}
-            disabled={!file || status === 'uploading' || status === 'requesting' || status === 'processing'}
-            className="px-4 py-2 rounded-lg bg-[#FFCC00] text-black font-semibold text-sm disabled:opacity-60 hover:scale-[1.02] transition"
-          >
-            {status === 'idle' || status === 'error' ? 'Envoyer' : 'En cours…'}
-          </button>
+        <h2 className="text-lg font-bold">
+          {lesson.cloudflare_video_id ? 'Remplacer la vidéo' : 'Ajouter une vidéo'}
+        </h2>
+
+        <div className="flex items-center gap-2">
+          {tabBtn('upload', 'Téléverser un fichier')}
+          {tabBtn('link', 'Lier une vidéo existante')}
         </div>
+
+        {tab === 'upload' ? (
+          <>
+            <p className="text-sm text-gray-400">
+              La vidéo est envoyée directement à Cloudflare Stream (elle ne passe pas par notre serveur).
+            </p>
+            <input
+              type="file"
+              accept="video/*"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#FFCC00] file:text-black file:font-semibold"
+            />
+            {status === 'uploading' ? (
+              <div>
+                <div className="w-full h-2 bg-[#21262d] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#FFCC00] transition-all" style={{ width: `${progress}%` }} />
+                </div>
+                <div className="text-xs text-gray-500 mt-1 font-mono">
+                  Envoi à Cloudflare: {Math.round(progress)}%
+                </div>
+              </div>
+            ) : null}
+            {status === 'processing' ? (
+              <div className="text-sm text-gray-400">
+                Cloudflare traite la vidéo… (durée et miniature bientôt disponibles)
+              </div>
+            ) : null}
+            {status === 'done' ? (
+              <div className="text-sm text-green-400">
+                Vidéo envoyée !{' '}
+                {updated?.duration_seconds
+                  ? `Durée: ${Math.round(updated.duration_seconds)}s`
+                  : 'Métadonnées en cours via webhook.'}
+              </div>
+            ) : null}
+            {err ? <div className="text-sm text-red-400">{err}</div> : null}
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 rounded-lg border border-[#30363d] hover:border-[#FFCC00]/60 text-sm transition"
+              >
+                Fermer
+              </button>
+              <button
+                onClick={upload}
+                disabled={!file || status === 'uploading' || status === 'requesting' || status === 'processing'}
+                className="px-4 py-2 rounded-lg bg-[#FFCC00] text-black font-semibold text-sm disabled:opacity-60 hover:scale-[1.02] transition"
+              >
+                {status === 'idle' || status === 'error' ? 'Envoyer' : 'En cours…'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-gray-400">
+              Collez l&apos;UID d&apos;une vidéo déjà présente dans votre compte Cloudflare Stream
+              (32 caractères hex). Vous pouvez aussi coller l&apos;URL complète — l&apos;UID sera extrait automatiquement.
+            </p>
+            <label className="block text-sm">
+              UID Cloudflare
+              <input
+                value={uidInput}
+                onChange={(e) => setUidInput(e.target.value)}
+                placeholder="ex. b59c5c51b..."
+                autoFocus
+                className="mt-1 w-full px-3 py-2 rounded-lg bg-[#0d1117] border border-[#30363d] focus:border-[#FFCC00] focus:outline-none font-mono text-sm"
+              />
+            </label>
+            {linkStatus === 'done' ? (
+              <div className="text-sm text-green-400">{linkMsg}</div>
+            ) : null}
+            {linkStatus === 'error' ? (
+              <div className="text-sm text-red-400">{linkMsg}</div>
+            ) : null}
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 rounded-lg border border-[#30363d] hover:border-[#FFCC00]/60 text-sm transition"
+              >
+                Fermer
+              </button>
+              <button
+                onClick={linkUid}
+                disabled={!uidInput.trim() || linkStatus === 'linking'}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#FFCC00] text-black font-semibold text-sm disabled:opacity-60 hover:scale-[1.02] transition"
+              >
+                <LinkIcon className="w-3.5 h-3.5" />
+                {linkStatus === 'linking' ? 'Liaison…' : 'Lier la vidéo'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

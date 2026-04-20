@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import AppShell from '@/components/app/AppShell';
 import LevelBadge from '@/components/app/LevelBadge';
 import VideoPlayer from '@/components/app/VideoPlayer';
+import VideoPrefetch from '@/components/app/VideoPrefetch';
 import NotesPanel from '@/components/app/NotesPanel';
 import { getSessionAndProfile, isActiveUser } from '@/lib/supabase/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -85,6 +86,7 @@ export default async function LessonPage({ params }) {
   const isTrial = isTrialProfile(profile);
 
   let signedToken = null;
+  let signingFailed = false;
   if (!locked && lesson.cloudflare_video_id) {
     try {
       signedToken = await signPlaybackToken({
@@ -92,12 +94,22 @@ export default async function LessonPage({ params }) {
         expSeconds: 3 * 3600,
       });
     } catch (err) {
+      signingFailed = true;
       console.error('signPlaybackToken failed:', err);
     }
   }
 
+  // Prefetch prev/next iframes so the next click feels instant. Skip locked
+  // neighbours (trial users) and lessons without an attached video.
+  const prefetchLessons = [prev, next]
+    .filter(Boolean)
+    .filter((l) => profile.is_admin || canAccessLesson(profile, l.id, trialUnlock))
+    .filter((l) => l.cloudflare_video_id)
+    .map((l) => ({ id: l.id, cloudflare_video_id: l.cloudflare_video_id }));
+
   return (
     <AppShell activeSection="dashboard">
+      <VideoPrefetch lessons={prefetchLessons} />
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
         <Link
           href={`/courses/${course.slug}`}
@@ -134,9 +146,32 @@ export default async function LessonPage({ params }) {
                 initialCompleted={!!progress?.completed}
                 durationSeconds={lesson.duration_seconds || 0}
               />
+            ) : signingFailed ? (
+              <div className="aspect-video w-full rounded-2xl border border-red-500/30 bg-[#161b22] flex flex-col items-center justify-center gap-2 text-center px-6">
+                <div className="text-red-300 font-semibold">
+                  Lecture temporairement indisponible
+                </div>
+                <p className="text-sm text-gray-400 max-w-md">
+                  Impossible de générer le lien de lecture pour le moment.
+                  Réessayez dans quelques instants.
+                </p>
+              </div>
             ) : (
-              <div className="aspect-video w-full rounded-2xl border border-[#30363d] bg-[#161b22] flex items-center justify-center text-gray-500">
-                Vidéo en cours de traitement…
+              <div className="aspect-video w-full rounded-2xl border border-[#30363d] bg-[#161b22] flex flex-col items-center justify-center gap-2 text-center px-6">
+                <div className="text-gray-300 font-semibold">
+                  Vidéo pas encore disponible
+                </div>
+                <p className="text-sm text-gray-500 max-w-md">
+                  Aucune vidéo n'est encore attachée à cette leçon.
+                </p>
+                {profile.is_admin ? (
+                  <Link
+                    href={`/admin/courses/${course.slug}`}
+                    className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#FFCC00]/40 text-[#FFCC00] text-xs hover:bg-[#FFCC00]/10 transition"
+                  >
+                    Attacher une vidéo
+                  </Link>
+                ) : null}
               </div>
             )}
 

@@ -25,16 +25,9 @@ export default function VideoPlayer({
   const [completed, setCompleted] = useState(initialCompleted);
   const [watched, setWatched] = useState(initialWatchedSeconds);
 
-  // Load the Stream SDK once.
-  useEffect(() => {
-    const existing = document.querySelector('script[data-stream-sdk]');
-    if (existing) return;
-    const s = document.createElement('script');
-    s.src = 'https://embed.cloudflarestream.com/embed/sdk.latest.js';
-    s.async = true;
-    s.dataset.streamSdk = '1';
-    document.head.appendChild(s);
-  }, []);
+  // Stream SDK is preloaded in the (app) layout <head> so window.Stream is
+  // usually already available by the time this component mounts. The attach()
+  // loop below still polls in case the script is still parsing.
 
   function flushProgress(value, markCompleted = false) {
     lastSentRef.current = value;
@@ -120,7 +113,7 @@ export default function VideoPlayer({
     onCompleted && onCompleted();
   }
 
-  const src = `https://iframe.videodelivery.net/${signedToken}?preload=true&poster=`;
+  const src = `https://iframe.videodelivery.net/${signedToken}?preload=true`;
 
   return (
     <div className="space-y-3">

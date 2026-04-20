@@ -5,6 +5,7 @@ import AppShell from '@/components/app/AppShell';
 import LevelBadge from '@/components/app/LevelBadge';
 import LessonCard from '@/components/app/LessonCard';
 import ProgressBar from '@/components/app/ProgressBar';
+import VideoPrefetch from '@/components/app/VideoPrefetch';
 import { getSessionAndProfile, isActiveUser } from '@/lib/supabase/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import {
@@ -39,7 +40,7 @@ export default async function CoursePage({ params }) {
 
   const { data: lessons } = await admin
     .from('lessons')
-    .select('id, title, description, thumbnail_url, duration_seconds, order_index, is_published')
+    .select('id, title, description, thumbnail_url, duration_seconds, order_index, is_published, cloudflare_video_id')
     .eq('course_id', course.id)
     .order('order_index', { ascending: true });
 
@@ -65,8 +66,19 @@ export default async function CoursePage({ params }) {
   const trialUnlock = profile.is_admin ? null : await getTrialUnlockedLesson();
   const isTrial = isTrialProfile(profile) && !profile.is_admin;
 
+  // Prefetch the first lesson the student can actually play in this course.
+  // For full-access users that's the first published lesson; for trial users
+  // it's only the trial-unlocked lesson (if it belongs to this course).
+  const firstAccessible = visibleLessons.find((l) =>
+    profile.is_admin || canAccessLesson(profile, l.id, trialUnlock)
+  );
+  const prefetchLessons = firstAccessible?.cloudflare_video_id
+    ? [{ id: firstAccessible.id, cloudflare_video_id: firstAccessible.cloudflare_video_id }]
+    : [];
+
   return (
     <AppShell activeSection="dashboard">
+      <VideoPrefetch lessons={prefetchLessons} />
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 space-y-6">
         <Link
           href="/dashboard"
