@@ -3,13 +3,14 @@ import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import AppShell from '@/components/app/AppShell';
 import LevelBadge from '@/components/app/LevelBadge';
-import VideoPlayer from '@/components/app/VideoPlayer';
 import VideoPrefetch from '@/components/app/VideoPrefetch';
 import NotesPanel from '@/components/app/NotesPanel';
+import LessonFlow from '@/components/app/LessonFlow';
 import { getSessionAndProfile, isActiveUser } from '@/lib/supabase/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { signPlaybackToken } from '@/lib/cloudflare/signedUrl';
 import { formatDuration } from '@/lib/format';
+import { getQuizForLesson } from '@/lib/quizzes';
 import {
   getTrialUnlockedLesson,
   canAccessLesson,
@@ -139,12 +140,15 @@ export default async function LessonPage({ params }) {
                 </a>
               </div>
             ) : signedToken ? (
-              <VideoPlayer
+              <LessonFlow
                 lessonId={lesson.id}
                 signedToken={signedToken}
                 initialWatchedSeconds={progress?.watched_seconds || 0}
                 initialCompleted={!!progress?.completed}
                 durationSeconds={lesson.duration_seconds || 0}
+                quiz={getQuizForLesson(lesson.title)}
+                prevHref={prev ? `/courses/${course.slug}/lessons/${prev.id}` : null}
+                nextHref={next ? `/courses/${course.slug}/lessons/${next.id}` : null}
               />
             ) : signingFailed ? (
               <div className="aspect-video w-full rounded-2xl border border-red-500/30 bg-[#161b22] flex flex-col items-center justify-center gap-2 text-center px-6">
@@ -204,14 +208,14 @@ export default async function LessonPage({ params }) {
 
             <NotesPanel lessonId={lesson.id} initialContent={note?.content || ''} />
 
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between pt-2" dir="rtl">
               {prev ? (
                 <Link
                   href={`/courses/${course.slug}/lessons/${prev.id}`}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#30363d] hover:border-[#FFCC00]/60 transition text-sm"
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  Précédente
+                  <ArrowRight className="w-4 h-4" />
+                  الدرس السابق
                 </Link>
               ) : (
                 <span />
@@ -221,8 +225,8 @@ export default async function LessonPage({ params }) {
                   href={`/courses/${course.slug}/lessons/${next.id}`}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FFCC00] text-black font-semibold text-sm hover:scale-[1.02] transition"
                 >
-                  Leçon suivante
-                  <ArrowRight className="w-4 h-4" />
+                  الدرس التالي
+                  <ArrowLeft className="w-4 h-4" />
                 </Link>
               ) : null}
             </div>

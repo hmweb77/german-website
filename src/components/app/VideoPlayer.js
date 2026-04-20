@@ -127,16 +127,16 @@ export default function VideoPlayer({
           className="w-full h-full"
         />
       </div>
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500 font-mono">
-          {completed ? '✓ Terminé' : `Progression: ${Math.round(watched)}s`}
+      <div className="flex items-center justify-between" dir="rtl">
+        <span className="text-xs text-gray-500 font-mono" dir="ltr">
+          {completed ? '✓ تم' : `التقدم: ${Math.round(watched)}ث`}
         </span>
         <button
           onClick={markComplete}
           disabled={completed}
           className="px-4 py-2 rounded-xl bg-[#FFCC00] text-black font-semibold text-sm disabled:opacity-60 hover:scale-[1.02] transition"
         >
-          {completed ? 'Leçon terminée' : 'Marquer comme terminé'}
+          {completed ? 'تم إنهاء الدرس' : 'أنهِ الفيديو لاجتياز الاختبار'}
         </button>
       </div>
     </div>
