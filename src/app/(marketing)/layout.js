@@ -2,9 +2,9 @@ import "../globals.css";
 import MetaPixel from "@/components/analytics/MetaPixel";
 
 export const metadata = {
-  title: "Maroc Deutsch، تعلم الألمانية من الصفر حتى A2",
+  title: "Maroc Deutsch، تعلم الألمانية من الصفر حتى B2",
   description:
-    "كورسات كاملة بالفيديو لتعلم الألمانية من الصفر حتى مستوى A2. منظمين خطوة بخطوة مع تمارين وامتحانات.",
+    "كورسات كاملة بالفيديو لتعلم الألمانية من الصفر حتى مستوى B2. منظمين خطوة بخطوة مع تمارين وامتحانات.",
 };
 
 export default function MarketingLayout({ children }) {
