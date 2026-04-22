@@ -137,7 +137,7 @@ function NewCourseModal({ onClose, onSaved }) {
     title: '',
     slug: '',
     description: '',
-    level: 'A1.1',
+    level: 'A1',
     order_index: 0,
   });
   const [loading, setLoading] = useState(false);

@@ -5,7 +5,7 @@ import { generateCertificatePdf } from '@/lib/certificates/generate';
 
 export const runtime = 'nodejs';
 
-const VALID_LEVELS = ['A1.1', 'A1.2', 'A2.1', 'A2.2'];
+const VALID_LEVELS = ['A1', 'A2', 'B1', 'B2'];
 
 export async function GET(_request, { params }) {
   const { level } = await params;

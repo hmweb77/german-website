@@ -22,7 +22,7 @@ export const courseSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Lettres minuscules, chiffres et tirets seulement'),
   title: z.string().trim().min(2).max(120),
   description: z.string().trim().max(2000).optional().nullable(),
-  level: z.enum(['A1.1', 'A1.2', 'A2.1', 'A2.2']),
+  level: z.enum(['A1', 'A2', 'B1', 'B2']),
   order_index: z.number().int().optional(),
   is_published: z.boolean().optional(),
 });

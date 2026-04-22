@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 
-const LEVELS = ['A1.1', 'A1.2', 'A2.1', 'A2.2'];
+const LEVELS = ['A1', 'A2', 'B1', 'B2'];
 
 export default function CourseEditor({ course, lessons }) {
   const router = useRouter();
