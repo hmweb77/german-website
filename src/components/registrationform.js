@@ -61,7 +61,7 @@ export default function RegistrationForm() {
             <div className="bg-[#FFCC00] p-6 text-black flex justify-between items-center">
               <div>
                 <h3 className="font-black text-xl">التسجيل، الحزمة الكاملة 🇩🇪</h3>
-                <p className="text-xs font-bold opacity-80 uppercase tracking-tight">A1.1 → A2.2 · 149dh</p>
+                <p className="text-xs font-bold opacity-80 uppercase tracking-tight">A1.1 → A2.2 · 249dh</p>
               </div>
               <Award size={40} className="opacity-20" />
             </div>
@@ -137,7 +137,7 @@ export default function RegistrationForm() {
                 >
                   {status === 'idle' && (
                     <>
-                      سجّل دابا، 149dh
+                      سجّل دابا، 249dh
                       <ArrowLeft size={24} />
                     </>
                   )}

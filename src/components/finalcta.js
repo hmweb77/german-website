@@ -15,7 +15,7 @@ export function FinalCTA() {
         </p>
         <div className="flex flex-col items-center gap-6">
           <a href="#register" className="bg-[#FFCC00] text-black px-12 py-6 rounded-2xl font-black text-2xl hover:scale-105 transition-all shadow-[0_20px_60px_rgba(255,204,0,0.4)]">
-            سجّل دابا، 149dh فقط ←
+            سجّل دابا، 249dh فقط ←
           </a>
           <span className="flex items-center gap-2 text-gray-500 font-bold">
             <ShieldCheck size={20} />

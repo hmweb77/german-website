@@ -49,8 +49,8 @@ export default function Pricing() {
                   aria-hidden="true"
                 />
               </span>
-              <div className="text-5xl font-black text-[#FFCC00]">149 درهم</div>
-              <p className="text-green-500 text-xl font-bold mt-2">کتوفر 167dh، أكثر من 50% تخفيض</p>
+              <div className="text-5xl font-black text-[#FFCC00]">249 درهم</div>
+              <p className="text-green-500 text-xl font-bold mt-2">کتوفر 67dh، حوالي 21% تخفيض</p>
             </div>
             <div className="space-y-4 mb-10 flex-1">
               <div className="flex items-center gap-3 text-white text-sm"><Check size={18} className="text-[#FFCC00]" /> 4 كورسات كاملين (A1 → A2)</div>
@@ -61,7 +61,7 @@ export default function Pricing() {
               <div className="flex items-center gap-3 text-white text-sm"><Check size={18} className="text-[#FFCC00]" /> تحديثات مستقبلية مجانية</div>
             </div>
             <a href="#register" className="w-full py-5 rounded-xl bg-[#FFCC00] text-black font-black text-xl hover:scale-105 transition-all shadow-[0_10px_30px_rgba(255,204,0,0.3)] text-center flex items-center justify-center gap-3">
-              بدا دابا، 149dh
+              بدا دابا، 249dh
               <ArrowLeft size={24} />
             </a>
             <p className="text-center text-gray-500 text-xs mt-4">ضمان 7 أيام، إلا ما عجبكش نرجعو ليك فلوسك 🛡️</p>
@@ -96,7 +96,7 @@ export default function Pricing() {
                 </tr>
                 <tr className="bg-[#FFCC00]/10">
                   <td className="p-6 text-white font-black text-lg">كلشي غادي تخلص ←</td>
-                  <td className="p-6 text-[#FFCC00] font-black text-3xl">149dh</td>
+                  <td className="p-6 text-[#FFCC00] font-black text-3xl">249dh</td>
                 </tr>
               </tbody>
             </table>

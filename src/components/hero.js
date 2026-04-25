@@ -59,7 +59,7 @@ export default function Hero() {
 
           <motion.div variants={itemVariants} className="flex flex-wrap gap-4 mb-10">
             <a href="#register" className="bg-[#FFCC00] text-black px-8 py-4 rounded-xl font-black text-lg hover:shadow-[0_0_30px_rgba(255,204,0,0.3)] transition-all flex items-center gap-2">
-              بدا دابا بـ 149dh فقط
+              بدا دابا بـ 249dh فقط
               <ArrowLeft size={20} />
             </a>
             <a href="#curriculum" className="border border-[#30363d] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/5 transition-all">
@@ -127,7 +127,7 @@ export default function Hero() {
             <div className="bg-black/40 p-6 flex justify-between items-center border-t border-[#21262d]">
               <div className="text-right">
                 <span className="text-gray-500 line-through text-sm">316dh</span>
-                <div className="text-[#FFCC00] text-3xl font-black">149dh</div>
+                <div className="text-[#FFCC00] text-3xl font-black">249dh</div>
               </div>
               <div className="text-left text-[10px] text-gray-400 font-mono leading-tight">
                 TOTAL CONTENT<br />

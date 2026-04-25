@@ -28,7 +28,7 @@ export default function Navbar() {
             href="#register"
             className="bg-[#FFCC00] text-black px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform active:scale-95"
           >
-            سجّل دابا، 149dh
+            سجّل دابا، 249dh
           </a>
         </div>
       </div>
